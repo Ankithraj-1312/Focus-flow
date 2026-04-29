@@ -558,8 +558,8 @@
     <script>
         console.log("JS LOADED SUCCESSFULLY");
         document.getElementById('add-btn').onclick = () => {
-            console.log("BUTTON CLICKED");
-        };
+            // ...existing code...
+        // Removed duplicate handler that blocked addTask()
         // ─── State ───────────────────────────────────────────────────────────
         let tasks = [];
         const API_URL = "https://focus-flow-gdii.onrender.com";
