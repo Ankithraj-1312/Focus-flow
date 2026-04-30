@@ -662,9 +662,14 @@
         // ─── Fetch Tasks ──────────────────────────────────────────────────────
         async function fetchTasks() {
             try {
-                const res = await fetch(`${API_URL}?date=${selectedDate}`);
+                const res = await fetch(`${API_URL}/tasks?date=${selectedDate}`);
                 if (!res.ok) throw new Error(`API error: ${res.status}`);
-                tasks = await res.json();
+                let data = await res.json();
+                if (!Array.isArray(data)) {
+                    console.error("API did not return an array:", data);
+                    data = [];
+                }
+                tasks = data;
                 renderTasks();
             } catch (err) {
                 console.error("Fetch error:", err);
@@ -673,6 +678,7 @@
                 if (saved) {
                     try {
                         tasks = JSON.parse(saved);
+                        if (!Array.isArray(tasks)) tasks = [];
                         renderTasks();
                     } catch (e) {
                         console.error("LocalStorage parse error:", e);
@@ -842,7 +848,7 @@
             document.getElementById('add-btn').textContent = 'Adding...';
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(`${API_URL}/tasks`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -906,7 +912,7 @@
             if (!val) return;
 
             try {
-                const response = await fetch(`${API_URL}/${id}`, {
+                const response = await fetch(`${API_URL}/tasks/${id}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ text: val })
@@ -933,7 +939,7 @@
             if (!task) return;
 
             try {
-                const response = await fetch(`${API_URL}/${id}`, {
+                const response = await fetch(`${API_URL}/tasks/${id}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ completed: !task.completed })
@@ -952,7 +958,7 @@
             if (!task) return;
 
             try {
-                const response = await fetch(`${API_URL}/${id}`, {
+                const response = await fetch(`${API_URL}/tasks/${id}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ pinned: !task.pinned })
@@ -970,7 +976,7 @@
             if (!confirm('Delete mission?')) return;
 
             try {
-                const response = await fetch(`${API_URL}/${id}`, {
+                const response = await fetch(`${API_URL}/tasks/${id}`, {
                     method: "DELETE"
                 });
 
