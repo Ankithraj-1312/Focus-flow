@@ -24,6 +24,7 @@
             --success: #22c55e;
             --pin: #fbbf24;
             --ai-glow: rgba(129, 140, 248, 0.2);
+            --warning: #f59e0b;
         }
 
         * {
@@ -44,7 +45,7 @@
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
-            padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(200px + env(safe-area-inset-bottom, 0px));
         }
 
         .app-container {
@@ -213,11 +214,6 @@
             position: relative;
         }
 
-        .task-card.is-pinned {
-            border-color: var(--pin);
-            box-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
-        }
-
         .task-card.completed {
             opacity: 0.5;
         }
@@ -288,53 +284,83 @@
             transform: translateX(-50%);
             width: calc(100% - 40px);
             max-width: 610px;
-            background: rgba(15, 23, 42, 0.97);
-            padding: 15px 15px calc(15px + env(safe-area-inset-bottom, 0px));
+            background: #1e293b;
+            padding: 20px;
             border-radius: 24px 24px 0 0;
-            backdrop-filter: blur(20px);
             border: 1px solid var(--border);
-            z-index: 1000;
+            z-index: 9999;
+            box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
         }
 
         .main-input-area {
             display: flex;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            position: relative;
+            width: 100%;
+            align-items: stretch;
         }
 
-        input[type="text"] {
+        #task-input {
             flex: 1;
-            background: rgba(15, 23, 42, 0.5);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border);
             color: white;
-            padding: 12px 18px;
+            padding: 14px 18px;
             border-radius: 16px;
             outline: none;
             font-size: 16px;
+            pointer-events: auto;
+            -webkit-appearance: none;
+            appearance: none;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        #task-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #task-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(129, 140, 248, 0.3);
+            background: rgba(255, 255, 255, 0.08);
         }
 
         #add-btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 0 20px;
+            padding: 0 24px;
             border-radius: 16px;
             cursor: pointer;
             font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            pointer-events: auto;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        #add-btn:hover {
+            background: #6366f1;
+            transform: scale(1.05);
+        }
+
+        #add-btn:active {
+            transform: scale(0.98);
         }
 
         .toast {
             position: fixed;
-            bottom: 180px;
+            bottom: 220px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--success);
             color: white;
             padding: 12px 20px;
             border-radius: 10px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            z-index: 999;
+            z-index: 10000;
             animation: slideUp 0.3s ease;
         }
 
@@ -351,11 +377,227 @@
         }
 
         .calendar-wrapper {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             padding: 15px;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.9);
             border-radius: 20px;
             display: none;
+            border: 1px solid var(--border);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .cal-day-cell {
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+
+        .cal-day-cell:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .cal-day-cell.selected {
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .report-header {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .report-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .report-stat-item {
+            background: rgba(129, 140, 248, 0.1);
+            border: 1px solid var(--primary);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .report-stat-item strong {
+            font-size: 1.8rem;
+            display: block;
+            color: var(--primary);
+        }
+
+        .report-stat-item small {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .report-insights {
+            background: rgba(192, 132, 252, 0.1);
+            border: 1px solid var(--secondary);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .report-insights h4 {
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        .report-insights p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+
+        .task-breakdown {
+            margin-top: 20px;
+        }
+
+        .task-breakdown h4 {
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .breakdown-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+
+        .breakdown-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.3s;
+        }
+
+        .report-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .report-button:hover {
+            background: #6366f1;
+            transform: translateY(-2px);
+        }
+
+        .report-button.secondary {
+            background: var(--secondary);
+        }
+
+        .report-button.secondary:hover {
+            background: #b565f5;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-message {
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid var(--danger);
+            color: #fca5ac;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .success-message {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--success);
+            color: #86efac;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -379,7 +621,7 @@
 
         <div class="ai-banner" id="ai-insight-box">
             <i data-lucide="sparkles" color="#818cf8"></i>
-            <p id="ai-message">Analyzing your productivity patterns...</p>
+            <p id="ai-message">✨ AI insights ready to help you stay focused</p>
         </div>
 
         <div class="stats-grid">
@@ -397,7 +639,6 @@
             </div>
         </div>
 
-        <!-- Timeline with Arrows -->
         <div class="timeline-container">
             <button class="action-btn" onclick="shiftTimeline(-1)">
                 <i data-lucide="chevron-left"></i>
@@ -408,8 +649,9 @@
             </button>
         </div>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:10px;">
-            <div style="display:flex;gap:8px;">
+        <div
+            style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:10px;flex-wrap:wrap;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button id="filter-all"
                     style="background:var(--primary);color:white;border:none;padding:6px 14px;border-radius:10px;font-weight:600;cursor:pointer;font-size:0.85rem;">All</button>
                 <button id="filter-pending"
@@ -422,29 +664,42 @@
                 Copy Yesterday</button>
         </div>
 
+        <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
+            <button id="report-week-btn"
+                style="background:var(--accent);color:#0f172a;border:none;padding:8px 14px;border-radius:10px;font-weight:600;cursor:pointer;font-size:0.85rem;">📊
+                Week Report</button>
+            <button id="report-month-btn"
+                style="background:var(--accent);color:#0f172a;border:none;padding:8px 14px;border-radius:10px;font-weight:600;cursor:pointer;font-size:0.85rem;">📈
+                Month Report</button>
+            <button id="report-year-btn"
+                style="background:var(--accent);color:#0f172a;border:none;padding:8px 14px;border-radius:10px;font-weight:600;cursor:pointer;font-size:0.85rem;">📉
+                Year Report</button>
+        </div>
+
         <main>
             <ul id="task-list"></ul>
         </main>
 
         <div class="glass-input-box">
             <div class="calendar-wrapper" id="calendar-widget">
-                <div style="display:flex; justify-content: space-between; align-items:center;">
-                    <button class="action-btn" id="prev-month"><i data-lucide="chevron-left" size="18"></i></button>
-                    <h3 id="month-display" style="font-size:0.9rem"></h3>
-                    <button class="action-btn" id="next-month"><i data-lucide="chevron-right" size="18"></i></button>
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:10px;">
+                    <button class="action-btn" onclick="changeMonth(-1)" style="padding: 4px;"><i
+                            data-lucide="chevron-left" size="18"></i></button>
+                    <h3 id="month-display" style="font-size:0.9rem; flex:1; text-align:center;"></h3>
+                    <button class="action-btn" onclick="changeMonth(1)" style="padding: 4px;"><i
+                            data-lucide="chevron-right" size="18"></i></button>
                 </div>
                 <div id="calendar-days"
-                    style="display:grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align:center; margin-top:10px;">
-                </div>
+                    style="display:grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align:center;"></div>
             </div>
 
             <div class="main-input-area">
-                <input type="text" id="task-input" placeholder="What's next?">
+                <input type="text" id="task-input" placeholder="What's next?" autocomplete="off" spellcheck="false">
                 <button id="add-btn">Add</button>
             </div>
 
             <div class="bottom-controls" style="display:flex; justify-content: space-between; align-items:center;">
-                <div class="ai-suggest-chips" id="suggest-chips" style="display:flex; gap:8px;">
+                <div class="ai-suggest-chips" style="display:flex; gap:8px;">
                     <span class="chip" onclick="applySuggest('#work')"
                         style="background:rgba(129,140,248,0.1); border:1px solid var(--primary); padding:5px 10px; border-radius:10px; font-size:0.7rem; cursor:pointer;">+
                         #work</span>
@@ -452,11 +707,19 @@
                         style="background:rgba(129,140,248,0.1); border:1px solid var(--primary); padding:5px 10px; border-radius:10px; font-size:0.7rem; cursor:pointer;">+
                         #study</span>
                 </div>
-                <button class="cal-toggle-btn" id="toggle-calendar-btn"
-                    style="background:none; border:none; color:white; cursor:pointer;">
+                <button id="toggle-calendar-btn"
+                    style="background:none; border:none; color:white; cursor:pointer; padding:8px;">
                     <i data-lucide="calendar" size="20"></i>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeReportModal()">✕</button>
+            <div id="report-body"></div>
         </div>
     </div>
 
@@ -464,9 +727,11 @@
         let tasks = [];
         const API_URL = "https://focus-flow-gdii.onrender.com";
         let selectedDate = new Date().toLocaleDateString('en-CA');
+        let calDate = new Date();
         let timelineOffset = 0;
         let filterMode = 'all';
 
+        // ==================== UTILITY FUNCTIONS ====================
         function startClock() {
             const tick = () => {
                 const now = new Date();
@@ -485,6 +750,191 @@
             setTimeout(() => toast.remove(), 2000);
         }
 
+        function getDateRange(type) {
+            const today = new Date(selectedDate);
+            let startDate, endDate;
+
+            if (type === 'week') {
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - today.getDay());
+                endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 6);
+            } else if (type === 'month') {
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            } else if (type === 'year') {
+                startDate = new Date(today.getFullYear(), 0, 1);
+                endDate = new Date(today.getFullYear(), 11, 31);
+            }
+
+            return {
+                start: startDate.toLocaleDateString('en-CA'),
+                end: endDate.toLocaleDateString('en-CA'),
+                startDate,
+                endDate
+            };
+        }
+
+        async function fetchTasksForDateRange(startDate, endDate) {
+            try {
+                const res = await fetch(`${API_URL}/tasks`);
+                const allTasks = await res.json();
+                return allTasks.filter(t => {
+                    const taskDate = new Date(t.assignedDate);
+                    return taskDate >= startDate && taskDate <= endDate;
+                });
+            } catch (err) {
+                console.error(err);
+                return [];
+            }
+        }
+
+        function generateAIInsights(reportTasks) {
+            const completed = reportTasks.filter(t => t.completed).length;
+            const total = reportTasks.length;
+            const completionRate = total ? Math.round((completed / total) * 100) : 0;
+            const avgDaily = total > 0 ? Math.round(total / 7) : 0;
+
+            let insights = [];
+
+            if (completionRate >= 80) {
+                insights.push("🎯 Excellent productivity! You're crushing your goals!");
+            } else if (completionRate >= 60) {
+                insights.push("💪 Good progress! Keep the momentum going.");
+            } else if (completionRate >= 40) {
+                insights.push("📍 Moderate performance. Time to focus on priorities.");
+            } else {
+                insights.push("⚠️ Low completion rate. Break tasks into smaller chunks.");
+            }
+
+            if (avgDaily > 10) {
+                insights.push("📌 You're taking on a lot. Consider if all tasks are essential.");
+            } else if (avgDaily < 3) {
+                insights.push("💡 You have capacity. Push yourself to add more meaningful goals.");
+            }
+
+            const workTasks = reportTasks.filter(t => t.text.includes('#work')).length;
+            const studyTasks = reportTasks.filter(t => t.text.includes('#study')).length;
+
+            if (workTasks > 0) {
+                insights.push(`💼 Work tasks: ${workTasks} (${Math.round((workTasks / total) * 100)}%)`);
+            }
+            if (studyTasks > 0) {
+                insights.push(`📚 Study tasks: ${studyTasks} (${Math.round((studyTasks / total) * 100)}%)`);
+            }
+
+            return insights;
+        }
+
+        async function generateReport(type) {
+            const range = getDateRange(type);
+            const reportTasks = await fetchTasksForDateRange(range.startDate, range.endDate);
+
+            const completed = reportTasks.filter(t => t.completed).length;
+            const pending = reportTasks.filter(t => !t.completed).length;
+            const total = reportTasks.length;
+            const completionRate = total ? Math.round((completed / total) * 100) : 0;
+
+            const insights = generateAIInsights(reportTasks);
+
+            let reportHTML = `
+                <div class="report-header">
+                    <i data-lucide="zap"></i>
+                    ${type.charAt(0).toUpperCase() + type.slice(1)} Report
+                </div>
+                <p style="opacity: 0.7; margin-bottom: 15px; font-size: 0.9rem;">
+                    ${range.start} to ${range.end}
+                </p>
+
+                <div class="report-stats">
+                    <div class="report-stat-item">
+                        <strong>${total}</strong>
+                        <small>Total Tasks</small>
+                    </div>
+                    <div class="report-stat-item">
+                        <strong>${completionRate}%</strong>
+                        <small>Completion Rate</small>
+                    </div>
+                    <div class="report-stat-item">
+                        <strong>${completed}</strong>
+                        <small>Completed</small>
+                    </div>
+                    <div class="report-stat-item">
+                        <strong>${pending}</strong>
+                        <small>Pending</small>
+                    </div>
+                </div>
+
+                <div class="report-insights">
+                    <h4>✨ AI Insights</h4>
+                    <div style="font-size: 0.95rem;">
+                        ${insights.map(i => `<p style="margin-bottom: 8px;">• ${i}</p>`).join('')}
+                    </div>
+                </div>
+
+                <div class="task-breakdown">
+                    <h4>Task Distribution</h4>
+                    <div class="breakdown-item">
+                        <span>Completed</span>
+                        <div class="breakdown-bar">
+                            <div class="breakdown-bar-fill" style="width: ${completionRate}%; background: var(--success);"></div>
+                        </div>
+                        <span style="min-width: 40px; text-align: right;">${completed}</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Pending</span>
+                        <div class="breakdown-bar">
+                            <div class="breakdown-bar-fill" style="width: ${Math.round((pending / total) * 100)}%; background: var(--warning);"></div>
+                        </div>
+                        <span style="min-width: 40px; text-align: right;">${pending}</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button class="report-button" onclick="downloadReport('${type}', ${JSON.stringify({ total, completed, pending, completionRate, range })})">
+                        <i data-lucide="download" style="display: inline; margin-right: 5px;"></i> Download Report
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('report-body').innerHTML = reportHTML;
+            document.getElementById('report-modal').classList.add('active');
+            lucide.createIcons();
+        }
+
+        function closeReportModal() {
+            document.getElementById('report-modal').classList.remove('active');
+        }
+
+        function downloadReport(type, data) {
+            const content = `
+FocusFlow AI - ${type.toUpperCase()} REPORT
+Generated: ${new Date().toLocaleString()}
+Period: ${data.range.start} to ${data.range.end}
+
+SUMMARY
+-------
+Total Tasks: ${data.total}
+Completed: ${data.completed}
+Pending: ${data.pending}
+Completion Rate: ${data.completionRate}%
+
+This report was generated by FocusFlow AI based on your task data.
+Use these insights to improve your productivity and task management.
+            `;
+
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+            element.setAttribute('download', `FocusFlow_${type}_Report_${new Date().getTime()}.txt`);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+
+            showToast(`${type} report downloaded!`);
+        }
+
+        // ==================== TIMELINE & TASK FUNCTIONS ====================
         function shiftTimeline(dir) {
             timelineOffset += dir;
             setupTimeline();
@@ -493,13 +943,14 @@
         function setupTimeline() {
             const bar = document.getElementById('timeline-bar');
             bar.innerHTML = '';
+            const todayStr = new Date().toLocaleDateString('en-CA');
             for (let i = -1 + timelineOffset; i <= 3 + timelineOffset; i++) {
                 const d = new Date();
                 d.setDate(d.getDate() + i);
                 const dStr = d.toLocaleDateString('en-CA');
                 const tab = document.createElement('div');
                 tab.className = `day-tab ${dStr === selectedDate ? 'active' : ''}`;
-                tab.innerHTML = `<span>${i - timelineOffset === 0 ? 'Today' : d.toLocaleDateString(undefined, { weekday: 'short' })}</span><strong>${d.getDate()}</strong>`;
+                tab.innerHTML = `<span>${dStr === todayStr ? 'Today' : d.toLocaleDateString(undefined, { weekday: 'short' })}</span><strong>${d.getDate()}</strong>`;
                 tab.onclick = () => {
                     selectedDate = dStr;
                     setupTimeline();
@@ -512,9 +963,13 @@
         async function fetchTasks() {
             try {
                 const res = await fetch(`${API_URL}/tasks?date=${selectedDate}`);
+                if (!res.ok) throw new Error('Failed to fetch tasks');
                 tasks = await res.json();
                 renderTasks();
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error('Error fetching tasks:', err);
+                showToast('Error loading tasks');
+            }
         }
 
         window.toggleTask = async (id) => {
@@ -529,9 +984,9 @@
                     body: JSON.stringify({ completed: task.completed })
                 });
             } catch (err) {
+                console.error(err);
                 task.completed = !task.completed;
                 renderTasks();
-                showToast("Sync Error!");
             }
         };
 
@@ -547,14 +1002,12 @@
 
             filtered.forEach(task => {
                 const li = document.createElement('li');
-                li.className = `task-card ${task.completed ? 'completed' : ''} ${task.pinned ? 'is-pinned' : ''}`;
+                li.className = `task-card ${task.completed ? 'completed' : ''}`;
                 li.innerHTML = `
                     <div class="check-circle ${task.completed ? 'checked' : ''}" onclick="toggleTask('${task.id}')">
                         ${task.completed ? '<i data-lucide="check" size="16"></i>' : ''}
                     </div>
-                    <div class="task-content">
-                        <span class="task-text">${task.text.replace(/#(\w+)/g, '<span class="tag">#$1</span>')}</span>
-                    </div>
+                    <div class="task-content"><span class="task-text">${task.text}</span></div>
                     <div class="actions">
                         <button class="action-btn" onclick="deleteTask('${task.id}')"><i data-lucide="trash-2" size="16"></i></button>
                     </div>
@@ -574,69 +1027,155 @@
 
         async function addTask() {
             const inp = document.getElementById('task-input');
-            if (!inp.value.trim()) return;
-            const res = await fetch(`${API_URL}/tasks`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text: inp.value, assignedDate: selectedDate })
-            });
-            if (res.ok) { inp.value = ''; fetchTasks(); }
+            const val = inp.value.trim();
+
+            if (!val) {
+                showToast('Please enter a task');
+                inp.focus();
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/tasks`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        text: val,
+                        assignedDate: selectedDate
+                    })
+                });
+
+                if (res.ok) {
+                    inp.value = '';
+                    inp.focus();
+                    fetchTasks();
+                    showToast("Task added! 🚀");
+                } else {
+                    const error = await res.json();
+                    showToast(error.error || 'Failed to add task');
+                }
+            } catch (err) {
+                console.error('Error adding task:', err);
+                showToast('Network error. Check backend.');
+            }
         }
 
         window.deleteTask = async (id) => {
-            if (confirm('Delete?')) {
-                await fetch(`${API_URL}/tasks/${id}`, { method: "DELETE" });
-                fetchTasks();
+            if (confirm('Delete this task?')) {
+                try {
+                    await fetch(`${API_URL}/tasks/${id}`, { method: "DELETE" });
+                    fetchTasks();
+                    showToast('Task deleted');
+                } catch (err) {
+                    console.error(err);
+                    showToast('Error deleting task');
+                }
             }
         };
 
-        // --- Restored Copy Yesterday Logic ---
+        // ==================== CALENDAR FUNCTIONS ====================
+        function renderCalendar() {
+            const daysContainer = document.getElementById('calendar-days');
+            const monthDisplay = document.getElementById('month-display');
+            daysContainer.innerHTML = '';
+
+            const year = calDate.getFullYear();
+            const month = calDate.getMonth();
+            monthDisplay.innerText = calDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                empty.style.opacity = '0.3';
+                daysContainer.appendChild(empty);
+            }
+
+            // Days of month
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateObj = new Date(year, month, d);
+                const dStr = dateObj.toLocaleDateString('en-CA');
+                const cell = document.createElement('div');
+                cell.className = `cal-day-cell ${dStr === selectedDate ? 'selected' : ''}`;
+                cell.innerText = d;
+                cell.onclick = () => {
+                    selectedDate = dStr;
+                    document.getElementById('calendar-widget').style.display = 'none';
+                    setupTimeline();
+                    fetchTasks();
+                    renderCalendar();
+                };
+                daysContainer.appendChild(cell);
+            }
+        }
+
+        window.changeMonth = (dir) => {
+            calDate.setMonth(calDate.getMonth() + dir);
+            renderCalendar();
+        };
+
+        document.getElementById('toggle-calendar-btn').onclick = () => {
+            const cw = document.getElementById('calendar-widget');
+            const isHidden = cw.style.display === 'none' || !cw.style.display;
+            cw.style.display = isHidden ? 'block' : 'none';
+            if (isHidden) renderCalendar();
+        };
+
+        // ==================== COPY YESTERDAY & FILTERS ====================
         document.getElementById('copy-yesterday-to-today').onclick = async function () {
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
             const yestStr = yesterday.toLocaleDateString('en-CA');
             const todayStr = new Date().toLocaleDateString('en-CA');
-
             try {
                 const res = await fetch(`${API_URL}/tasks?date=${yestStr}`);
-                const prevTasks = await res.json();
-
-                const pending = prevTasks.filter(t => !t.completed);
-                if (pending.length === 0) {
-                    showToast("No pending tasks to copy!");
-                    return;
-                }
-
-                for (const t of pending) {
-                    await fetch(`${API_URL}/tasks`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ text: t.text, assignedDate: todayStr, pinned: t.pinned })
-                    });
-                }
-
+                const prev = await res.json();
+                const pending = prev.filter(t => !t.completed);
+                if (!pending.length) { showToast("Nothing to copy!"); return; }
+                await Promise.all(pending.map(t => fetch(`${API_URL}/tasks`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: t.text, assignedDate: todayStr })
+                })));
                 selectedDate = todayStr;
-                timelineOffset = 0;
-                setupTimeline();
                 fetchTasks();
-                showToast(`Copied ${pending.length} tasks!`);
+                showToast("Copied! 📋");
             } catch (err) {
-                showToast("Failed to copy tasks.");
+                console.error(err);
+                showToast("Error copying");
             }
         };
-
-        function applySuggest(tag) {
-            const inp = document.getElementById('task-input');
-            inp.value = tag + " ";
-            inp.focus();
-        }
 
         document.getElementById('filter-all').onclick = () => { filterMode = 'all'; renderTasks(); };
         document.getElementById('filter-pending').onclick = () => { filterMode = 'pending'; renderTasks(); };
         document.getElementById('filter-completed').onclick = () => { filterMode = 'completed'; renderTasks(); };
-        document.getElementById('add-btn').onclick = addTask;
-        document.getElementById('task-input').onkeydown = e => e.key === 'Enter' && addTask();
 
+        // ==================== REPORT BUTTONS ====================
+        document.getElementById('report-week-btn').onclick = () => generateReport('week');
+        document.getElementById('report-month-btn').onclick = () => generateReport('month');
+        document.getElementById('report-year-btn').onclick = () => generateReport('year');
+
+        // ==================== KEYBOARD SHORTCUTS ====================
+        document.getElementById('add-btn').onclick = addTask;
+        document.getElementById('task-input').onkeydown = e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTask();
+            }
+        };
+
+        document.getElementById('task-input').onfocus = function () {
+            this.select();
+        };
+
+        function applySuggest(tag) {
+            document.getElementById('task-input').value = tag + " ";
+            document.getElementById('task-input').focus();
+        }
+
+        // ==================== INITIALIZATION ====================
         startClock();
         setupTimeline();
         fetchTasks();
