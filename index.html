@@ -548,7 +548,13 @@
             </div>
         </div>
 
+
         <div class="timeline" id="timeline-bar"></div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
+            <button id="copy-prev-to-today"
+                style="background:var(--primary);color:white;border:none;padding:8px 18px;border-radius:12px;font-weight:700;cursor:pointer;">Copy
+                All From Selected Day To Today</button>
+        </div>
 
         <main>
             <ul id="task-list"></ul>
@@ -1041,6 +1047,58 @@
         document.getElementById('task-input').addEventListener('keydown', e => {
             if (e.key === 'Enter') addTask();
         });
+
+        // ─── Copy Previous Day Tasks to Today ────────────────────────────────
+        document.getElementById('copy-prev-to-today').onclick = async function () {
+            if (selectedDate === localDateStr()) {
+                showToast("You are already on today! Select a previous day.");
+                return;
+            }
+            // Fetch tasks for selectedDate (if not already loaded)
+            let prevTasks = [];
+            try {
+                const res = await fetch(`${API_URL}/tasks?date=${selectedDate}`);
+                if (!res.ok) throw new Error();
+                prevTasks = await res.json();
+            } catch {
+                showToast("Failed to fetch previous day tasks");
+                return;
+            }
+            if (!Array.isArray(prevTasks) || prevTasks.length === 0) {
+                showToast("No tasks to copy from selected day.");
+                return;
+            }
+            let copied = 0;
+            for (const t of prevTasks) {
+                // Only copy incomplete tasks
+                if (!t.completed) {
+                    try {
+                        const resp = await fetch(`${API_URL}/tasks`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                text: t.text,
+                                assignedDate: localDateStr(),
+                                pinned: t.pinned || false,
+                                category: t.category || "General",
+                                priority: t.priority || "Medium"
+                            })
+                        });
+                        if (resp.ok) copied++;
+                    } catch { }
+                }
+            }
+            if (copied > 0) {
+                showToast(`Copied ${copied} tasks to today!`);
+                // Switch to today and refresh
+                selectedDate = localDateStr();
+                setupTimeline();
+                renderCalendar();
+                fetchTasks(true);
+            } else {
+                showToast("No incomplete tasks to copy.");
+            }
+        };
 
         // ─── Init ─────────────────────────────────────────────────────────────
         startClock();
