@@ -44,7 +44,6 @@
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
-            /* FIX: safe-area for iPhone notch/home bar */
             padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px));
         }
 
@@ -135,12 +134,6 @@
             }
         }
 
-        .ai-banner p {
-            font-size: 0.9rem;
-            font-weight: 500;
-            flex: 1;
-        }
-
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -162,13 +155,19 @@
             color: var(--text);
         }
 
+        .timeline-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
         .timeline {
             display: flex;
             gap: 10px;
-            margin-bottom: 2rem;
             overflow-x: auto;
-            padding-bottom: 10px;
             scrollbar-width: none;
+            flex: 1;
         }
 
         .day-tab {
@@ -220,11 +219,12 @@
         }
 
         .task-card.completed {
-            opacity: 0.4;
+            opacity: 0.5;
         }
 
         .task-card.completed .task-text {
             text-decoration: line-through;
+            opacity: 0.6;
         }
 
         .check-circle {
@@ -248,31 +248,12 @@
         .task-content {
             flex: 1;
             margin: 0 15px;
-            cursor: grab;
-        }
-
-        .task-content:active {
-            cursor: grabbing;
         }
 
         .task-text {
             display: block;
             font-size: 1.05rem;
             font-weight: 500;
-        }
-
-        /* Edit mode */
-        .task-edit-input {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--primary);
-            color: var(--text);
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.05rem;
-            font-weight: 500;
-            border-radius: 8px;
-            padding: 4px 8px;
-            width: 100%;
-            outline: none;
         }
 
         .tag {
@@ -300,65 +281,6 @@
             color: var(--text);
         }
 
-        .pin-btn.active {
-            color: var(--pin);
-        }
-
-        .edit-btn.active {
-            color: var(--primary);
-        }
-
-        .calendar-wrapper {
-            margin-top: 10px;
-            padding: 15px;
-            border-radius: 20px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border);
-            display: none;
-            margin-bottom: 10px;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            text-align: center;
-        }
-
-        .cal-date {
-            padding: 8px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .cal-date:hover {
-            background: rgba(129, 140, 248, 0.15);
-        }
-
-        .cal-date.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .cal-date.today {
-            border: 1px solid var(--accent);
-            color: var(--accent);
-        }
-
-        .cal-date.today.active {
-            color: white;
-        }
-
-        /* FIX: Use sticky bottom bar instead of fixed to avoid iOS keyboard issues */
         .glass-input-box {
             position: fixed;
             bottom: 0;
@@ -371,8 +293,6 @@
             border-radius: 24px 24px 0 0;
             backdrop-filter: blur(20px);
             border: 1px solid var(--border);
-            border-bottom: none;
-            box-shadow: var(--shadow);
             z-index: 1000;
         }
 
@@ -391,12 +311,6 @@
             border-radius: 16px;
             outline: none;
             font-size: 16px;
-            font-family: 'Outfit', sans-serif;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--primary);
         }
 
         #add-btn {
@@ -407,69 +321,6 @@
             border-radius: 16px;
             cursor: pointer;
             font-weight: 700;
-            font-family: 'Outfit', sans-serif;
-            font-size: 1rem;
-            transition: opacity 0.2s;
-        }
-
-        #add-btn:hover {
-            opacity: 0.85;
-        }
-
-        #add-btn:active {
-            opacity: 0.7;
-        }
-
-        .bottom-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .ai-suggest-chips {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            flex: 1;
-        }
-
-        .chip {
-            background: rgba(129, 140, 248, 0.1);
-            border: 1px solid var(--primary);
-            padding: 5px 12px;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: background 0.2s;
-        }
-
-        .chip:hover {
-            background: rgba(129, 140, 248, 0.25);
-        }
-
-        .cal-toggle-btn {
-            background: transparent;
-            border: none;
-            color: var(--text);
-            opacity: 0.6;
-            cursor: pointer;
-            padding: 5px;
-            transition: opacity 0.2s;
-        }
-
-        .cal-toggle-btn:hover {
-            opacity: 1;
-        }
-
-        .empty-state {
-            text-align: center;
-            opacity: 0.3;
-            margin-top: 50px;
-            font-size: 1rem;
         }
 
         .toast {
@@ -499,14 +350,12 @@
             }
         }
 
-        @media (max-width: 600px) {
-            body {
-                padding-top: 10px;
-            }
-
-            .ai-banner {
-                margin-top: 10px;
-            }
+        .calendar-wrapper {
+            margin-bottom: 10px;
+            padding: 15px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 20px;
+            display: none;
         }
     </style>
 </head>
@@ -548,12 +397,29 @@
             </div>
         </div>
 
+        <!-- Timeline with Arrows -->
+        <div class="timeline-container">
+            <button class="action-btn" onclick="shiftTimeline(-1)">
+                <i data-lucide="chevron-left"></i>
+            </button>
+            <div class="timeline" id="timeline-bar"></div>
+            <button class="action-btn" onclick="shiftTimeline(1)">
+                <i data-lucide="chevron-right"></i>
+            </button>
+        </div>
 
-        <div class="timeline" id="timeline-bar"></div>
-        <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
-            <button id="copy-prev-to-today"
-                style="background:var(--primary);color:white;border:none;padding:8px 18px;border-radius:12px;font-weight:700;cursor:pointer;">Copy
-                All From Selected Day To Today</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:10px;">
+            <div style="display:flex;gap:8px;">
+                <button id="filter-all"
+                    style="background:var(--primary);color:white;border:none;padding:6px 14px;border-radius:10px;font-weight:600;cursor:pointer;font-size:0.85rem;">All</button>
+                <button id="filter-pending"
+                    style="background:transparent;color:var(--text);border:1px solid var(--border);padding:6px 14px;border-radius:10px;font-weight:600;cursor:pointer;font-size:0.85rem;">Pending</button>
+                <button id="filter-completed"
+                    style="background:transparent;color:var(--text);border:1px solid var(--border);padding:6px 14px;border-radius:10px;font-weight:600;cursor:pointer;font-size:0.85rem;">Completed</button>
+            </div>
+            <button id="copy-yesterday-to-today"
+                style="background:var(--secondary);color:white;border:none;padding:6px 14px;border-radius:10px;font-weight:600;cursor:pointer;font-size:0.85rem;white-space:nowrap;">📋
+                Copy Yesterday</button>
         </div>
 
         <main>
@@ -562,30 +428,32 @@
 
         <div class="glass-input-box">
             <div class="calendar-wrapper" id="calendar-widget">
-                <div class="calendar-header">
-                    <button class="action-btn" id="prev-month">
-                        <i data-lucide="chevron-left" size="18"></i>
-                    </button>
+                <div style="display:flex; justify-content: space-between; align-items:center;">
+                    <button class="action-btn" id="prev-month"><i data-lucide="chevron-left" size="18"></i></button>
                     <h3 id="month-display" style="font-size:0.9rem"></h3>
-                    <button class="action-btn" id="next-month">
-                        <i data-lucide="chevron-right" size="18"></i>
-                    </button>
+                    <button class="action-btn" id="next-month"><i data-lucide="chevron-right" size="18"></i></button>
                 </div>
-                <div class="calendar-grid" id="calendar-days"></div>
+                <div id="calendar-days"
+                    style="display:grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align:center; margin-top:10px;">
+                </div>
             </div>
 
             <div class="main-input-area">
-                <input type="text" id="task-input" placeholder="What's next? (Try #study)">
+                <input type="text" id="task-input" placeholder="What's next?">
                 <button id="add-btn">Add</button>
             </div>
 
-            <div class="bottom-controls">
-                <div class="ai-suggest-chips" id="suggest-chips">
-                    <span class="chip" onclick="applySuggest('#work')">+ #work</span>
-                    <span class="chip" onclick="applySuggest('#study')">+ #study</span>
-                    <span class="chip" onclick="applySuggest('#personal')">+ #personal</span>
+            <div class="bottom-controls" style="display:flex; justify-content: space-between; align-items:center;">
+                <div class="ai-suggest-chips" id="suggest-chips" style="display:flex; gap:8px;">
+                    <span class="chip" onclick="applySuggest('#work')"
+                        style="background:rgba(129,140,248,0.1); border:1px solid var(--primary); padding:5px 10px; border-radius:10px; font-size:0.7rem; cursor:pointer;">+
+                        #work</span>
+                    <span class="chip" onclick="applySuggest('#study')"
+                        style="background:rgba(129,140,248,0.1); border:1px solid var(--primary); padding:5px 10px; border-radius:10px; font-size:0.7rem; cursor:pointer;">+
+                        #study</span>
                 </div>
-                <button class="cal-toggle-btn" id="toggle-calendar-btn">
+                <button class="cal-toggle-btn" id="toggle-calendar-btn"
+                    style="background:none; border:none; color:white; cursor:pointer;">
                     <i data-lucide="calendar" size="20"></i>
                 </button>
             </div>
@@ -593,518 +461,185 @@
     </div>
 
     <script>
-        console.log("JS LOADED SUCCESSFULLY");
-
-        // ─── State ───────────────────────────────────────────────────────────
         let tasks = [];
-
-        // 🔧 UPDATE THIS with your actual Render backend URL
         const API_URL = "https://focus-flow-gdii.onrender.com";
+        let selectedDate = new Date().toLocaleDateString('en-CA');
+        let timelineOffset = 0;
+        let filterMode = 'all';
 
-        // Validate API_URL on page load
-        if (!API_URL || API_URL === "https://focus-flow-gdii.onrender.com") {
-            console.warn("⚠️ Using default API_URL. Update it with your actual Render backend URL in the code.");
+        function startClock() {
+            const tick = () => {
+                const now = new Date();
+                document.getElementById('current-time').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('current-day-name').innerText = now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+            };
+            tick();
+            setInterval(tick, 1000);
         }
 
-        let editingId = null;
-        let isAddingTask = false;
-
-        // FIX #1: Use local date string (YYYY-MM-DD) to avoid UTC timezone offset bug.
-        function localDateStr(date = new Date()) {
-            return date.toLocaleDateString('en-CA'); // 'en-CA' gives YYYY-MM-DD in local time
-        }
-
-        let selectedDate = localDateStr();
-        let calendarNavDate = new Date();
-
-        // ─── Toast Notification ───────────────────────────────────────────────
-        function showToast(message, duration = 2000) {
+        function showToast(message) {
             const toast = document.createElement('div');
             toast.className = 'toast';
             toast.textContent = message;
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), duration);
+            setTimeout(() => toast.remove(), 2000);
         }
 
-        // ─── Clock ───────────────────────────────────────────────────────────
-        let clockInterval = null;
-        function startClock() {
-            if (clockInterval) clearInterval(clockInterval);
-            function tick() {
-                const now = new Date();
-                document.getElementById('current-time').innerText =
-                    now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                document.getElementById('current-day-name').innerText =
-                    now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-            }
-            tick();
-            clockInterval = setInterval(tick, 1000);
+        function shiftTimeline(dir) {
+            timelineOffset += dir;
+            setupTimeline();
         }
 
-        // ─── AI Insights ─────────────────────────────────────────────────────
-        function generateAIInsights() {
-            const todayTasks = tasks.filter(t => t.assignedDate === selectedDate);
-            const doneToday = todayTasks.filter(t => t.completed).length;
-            const pending = todayTasks.filter(t => !t.completed).length;
-            const insightPara = document.getElementById('ai-message');
-
-            if (tasks.length === 0 || todayTasks.length === 0) {
-                insightPara.innerText = tasks.length === 0
-                    ? "Welcome, Ankith! Ready to deploy your first mission?"
-                    : "Your schedule is clear. Use the time to plan ahead.";
-                return;
-            }
-            if (doneToday > 0 && doneToday === todayTasks.length) {
-                insightPara.innerText = `All ${doneToday} missions cleared for today. You're on fire! 🔥`;
-            } else if (doneToday > 2) {
-                insightPara.innerText = `You completed ${doneToday} tasks today. Keep that momentum! 🚀`;
-            } else {
-                insightPara.innerText = pending > 0
-                    ? `You have ${pending} mission${pending > 1 ? 's' : ''} active for today. Focus up!`
-                    : "Your schedule is clear. Use the time to plan ahead.";
-            }
-        }
-
-        // ─── Fetch Tasks ──────────────────────────────────────────────────────
-        let lastFetchedDate = null;
-        async function fetchTasks(force = false) {
-            // Only fetch if date changed or forced
-            if (!force && selectedDate === lastFetchedDate) {
-                renderTasks();
-                return;
-            }
-            lastFetchedDate = selectedDate;
-            try {
-                const res = await fetch(`${API_URL}/tasks?date=${selectedDate}`);
-                if (!res.ok) throw new Error(`API error: ${res.status}`);
-                let data = await res.json();
-                if (!Array.isArray(data)) {
-                    console.error("API did not return an array:", data);
-                    data = [];
-                }
-                tasks = data;
-                renderTasks();
-            } catch (err) {
-                console.error("Fetch error:", err);
-                // Try localStorage fallback
-                const saved = localStorage.getItem('ankith_focus_ai_v1');
-                if (saved) {
-                    try {
-                        tasks = JSON.parse(saved);
-                        if (!Array.isArray(tasks)) tasks = [];
-                        renderTasks();
-                    } catch (e) {
-                        console.error("LocalStorage parse error:", e);
-                    }
-                }
-            }
-        }
-
-        // ─── Render Tasks ─────────────────────────────────────────────────────
-        function renderTasks() {
-            const list = document.getElementById('task-list');
-            const filtered = tasks
-                .filter(t => t.assignedDate === selectedDate)
-                .sort((a, b) => {
-                    if (a.pinned !== b.pinned) return b.pinned - a.pinned;
-                    return a.completed - b.completed;
-                });
-
-            if (!filtered.length) {
-                list.innerHTML = '<p class="empty-state">No missions found.</p>';
-                updateStats();
-                generateAIInsights();
-                return;
-            }
-
-            list.innerHTML = '';
-            filtered.forEach(task => {
-                const li = document.createElement('li');
-                li.className = `task-card ${task.completed ? 'completed' : ''} ${task.pinned ? 'is-pinned' : ''}`;
-                li.dataset.id = task.id;
-
-                const displayText = task.text.replace(/#(\w+)/g, '<span class="tag">#$1</span>');
-
-                li.innerHTML = `
-                    <div class="check-circle ${task.completed ? 'checked' : ''}" onclick="toggleTask('${task.id}')">
-                        ${task.completed ? '<i data-lucide="check" size="16" color="white"></i>' : ''}
-                    </div>
-                    <div class="task-content">
-                        ${editingId === task.id
-                        ? `<input class="task-edit-input" id="edit-input-${task.id}" value="${escapeAttr(task.text)}" />`
-                        : `<span class="task-text" ondblclick="startEdit('${task.id}')">${displayText}</span>`
-                    }
-                    </div>
-                    <div class="actions">
-                        ${editingId === task.id
-                        ? `<button class="action-btn edit-btn active" onclick="saveEdit('${task.id}')"><i data-lucide="check" size="16"></i></button>
-                               <button class="action-btn" onclick="cancelEdit()"><i data-lucide="x" size="16"></i></button>`
-                        : `<button class="action-btn pin-btn ${task.pinned ? 'active' : ''}" onclick="togglePin('${task.id}')">
-                                   <i data-lucide="pin" size="16"></i>
-                               </button>
-                               <button class="action-btn" onclick="deleteTask('${task.id}')">
-                                   <i data-lucide="trash-2" size="16"></i>
-                               </button>`
-                    }
-                    </div>
-                `;
-                list.appendChild(li);
-            });
-
-            updateStats();
-            generateAIInsights();
-            lucide.createIcons();
-
-            // Focus edit input if in edit mode
-            if (editingId) {
-                const inp = document.getElementById(`edit-input-${editingId}`);
-                if (inp) {
-                    inp.focus();
-                    inp.selectionStart = inp.selectionEnd = inp.value.length;
-                    inp.addEventListener('keydown', e => {
-                        if (e.key === 'Enter') saveEdit(editingId);
-                        if (e.key === 'Escape') cancelEdit();
-                    });
-                }
-            }
-        }
-
-        function escapeAttr(str) {
-            return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        }
-
-        // FIX #5: Stats now count only today's tasks
-        function updateStats() {
-            const todayTasks = tasks.filter(t => t.assignedDate === selectedDate);
-            document.getElementById('stat-total').innerText = todayTasks.length;
-            document.getElementById('stat-pending').innerText = todayTasks.filter(t => !t.completed).length;
-            document.getElementById('stat-done').innerText = todayTasks.filter(t => t.completed).length;
-        }
-
-        // ─── Timeline ─────────────────────────────────────────────────────────
         function setupTimeline() {
             const bar = document.getElementById('timeline-bar');
             bar.innerHTML = '';
-            for (let i = -1; i <= 3; i++) {
+            for (let i = -1 + timelineOffset; i <= 3 + timelineOffset; i++) {
                 const d = new Date();
                 d.setDate(d.getDate() + i);
-                const dStr = localDateStr(d);
+                const dStr = d.toLocaleDateString('en-CA');
                 const tab = document.createElement('div');
                 tab.className = `day-tab ${dStr === selectedDate ? 'active' : ''}`;
-                tab.innerHTML = `<span>${i === 0 ? 'Today' : d.toLocaleDateString(undefined, { weekday: 'short' })}</span><strong>${d.getDate()}</strong>`;
+                tab.innerHTML = `<span>${i - timelineOffset === 0 ? 'Today' : d.toLocaleDateString(undefined, { weekday: 'short' })}</span><strong>${d.getDate()}</strong>`;
                 tab.onclick = () => {
                     selectedDate = dStr;
-                    editingId = null;
                     setupTimeline();
-                    renderCalendar();
-                    fetchTasks(true); // Always fetch tasks when date changes
+                    fetchTasks();
                 };
                 bar.appendChild(tab);
             }
         }
 
-        // ─── Calendar ─────────────────────────────────────────────────────────
-        function renderCalendar() {
-            const monthDisplay = document.getElementById('month-display');
-            const daysGrid = document.getElementById('calendar-days');
-            monthDisplay.innerText = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(calendarNavDate);
-            daysGrid.innerHTML = '';
-
-            ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(d => {
-                const h = document.createElement('div');
-                h.style.cssText = 'font-size:10px;opacity:0.5;text-align:center;padding:4px 0';
-                h.innerText = d;
-                daysGrid.appendChild(h);
-            });
-
-            const firstDay = new Date(calendarNavDate.getFullYear(), calendarNavDate.getMonth(), 1).getDay();
-            const daysInMonth = new Date(calendarNavDate.getFullYear(), calendarNavDate.getMonth() + 1, 0).getDate();
-            const todayStr = localDateStr();
-
-            for (let i = 0; i < firstDay; i++) daysGrid.appendChild(document.createElement('div'));
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = localDateStr(new Date(calendarNavDate.getFullYear(), calendarNavDate.getMonth(), day));
-                const d = document.createElement('div');
-                const isActive = dateStr === selectedDate;
-                const isToday = dateStr === todayStr;
-                d.className = `cal-date${isActive ? ' active' : ''}${isToday ? ' today' : ''}`;
-                d.innerText = day;
-                d.onclick = () => {
-                    selectedDate = dateStr;
-                    editingId = null;
-                    setupTimeline();
-                    renderCalendar();
-                    fetchTasks(true); // Always fetch tasks when date changes
-                };
-                daysGrid.appendChild(d);
-            }
-        }
-
-        // ─── ADD TASK (FIXED) ──────────────────────────────────────────────────
-        async function addTask() {
-            const input = document.getElementById('task-input');
-            const val = input.value.trim();
-
-            if (!val) {
-                showToast("⚠️ Please enter a task!");
-                return;
-            }
-
-            if (isAddingTask) {
-                showToast("⏳ Task is being added...");
-                return;
-            }
-
-            isAddingTask = true;
-            document.getElementById('add-btn').disabled = true;
-            document.getElementById('add-btn').textContent = 'Adding...';
-
+        async function fetchTasks() {
             try {
-                const response = await fetch(`${API_URL}/tasks`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        text: val,
-                        assignedDate: selectedDate
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API error: ${response.status}`);
-                }
-
-                input.value = '';
-                showToast("✅ Task added!");
-                await fetchTasks();
-            } catch (err) {
-                console.error("Add task error:", err);
-                showToast("❌ Failed to add task. Check your connection.");
-
-                // Fallback: save to localStorage
-                try {
-                    const newTask = {
-                        id: Date.now().toString(),
-                        text: val,
-                        assignedDate: selectedDate,
-                        completed: false,
-                        pinned: false
-                    };
-                    tasks.push(newTask);
-                    localStorage.setItem('ankith_focus_ai_v1', JSON.stringify(tasks));
-                    input.value = '';
-                    renderTasks();
-                    showToast("💾 Saved locally (sync pending)");
-                } catch (e) {
-                    console.error("LocalStorage save error:", e);
-                }
-            } finally {
-                isAddingTask = false;
-                document.getElementById('add-btn').disabled = false;
-                document.getElementById('add-btn').textContent = 'Add';
-            }
+                const res = await fetch(`${API_URL}/tasks?date=${selectedDate}`);
+                tasks = await res.json();
+                renderTasks();
+            } catch (err) { console.error(err); }
         }
-
-        function applySuggest(tag) {
-            const input = document.getElementById('task-input');
-            input.value = tag + ' ';
-            input.focus();
-        }
-
-        // ─── Task Actions ─────────────────────────────────────────────────────
-        window.startEdit = (id) => {
-            editingId = id;
-            renderTasks();
-        };
-
-        window.saveEdit = async (id) => {
-            const inp = document.getElementById(`edit-input-${id}`);
-            if (!inp) return;
-
-            const val = inp.value.trim();
-            if (!val) return;
-
-            try {
-                const response = await fetch(`${API_URL}/tasks/${id}`, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text: val })
-                });
-
-                if (!response.ok) throw new Error(`API error: ${response.status}`);
-
-                editingId = null;
-                showToast("✅ Task updated!");
-                fetchTasks();
-            } catch (err) {
-                console.error("Save edit error:", err);
-                showToast("❌ Failed to update task");
-            }
-        };
-
-        window.cancelEdit = () => {
-            editingId = null;
-            renderTasks();
-        };
 
         window.toggleTask = async (id) => {
             const task = tasks.find(t => t.id === id);
             if (!task) return;
-
+            task.completed = !task.completed;
+            renderTasks();
             try {
-                const response = await fetch(`${API_URL}/tasks/${id}`, {
+                await fetch(`${API_URL}/tasks/${id}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ completed: !task.completed })
+                    body: JSON.stringify({ completed: task.completed })
                 });
-
-                if (!response.ok) throw new Error(`API error: ${response.status}`);
-                fetchTasks();
             } catch (err) {
-                console.error("Toggle task error:", err);
-                showToast("❌ Failed to update task");
+                task.completed = !task.completed;
+                renderTasks();
+                showToast("Sync Error!");
             }
         };
 
-        window.togglePin = async (id) => {
-            const task = tasks.find(t => t.id === id);
-            if (!task) return;
+        function renderTasks() {
+            const list = document.getElementById('task-list');
+            let filtered = tasks.filter(t => t.assignedDate === selectedDate)
+                .sort((a, b) => b.pinned - a.pinned || a.completed - b.completed);
 
-            try {
-                const response = await fetch(`${API_URL}/tasks/${id}`, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ pinned: !task.pinned })
-                });
+            if (filterMode === 'pending') filtered = filtered.filter(t => !t.completed);
+            if (filterMode === 'completed') filtered = filtered.filter(t => t.completed);
 
-                if (!response.ok) throw new Error(`API error: ${response.status}`);
-                fetchTasks();
-            } catch (err) {
-                console.error("Toggle pin error:", err);
-                showToast("❌ Failed to pin task");
-            }
-        };
+            list.innerHTML = filtered.length ? '' : '<p style="text-align:center; opacity:0.3; margin-top:50px;">No missions found.</p>';
+
+            filtered.forEach(task => {
+                const li = document.createElement('li');
+                li.className = `task-card ${task.completed ? 'completed' : ''} ${task.pinned ? 'is-pinned' : ''}`;
+                li.innerHTML = `
+                    <div class="check-circle ${task.completed ? 'checked' : ''}" onclick="toggleTask('${task.id}')">
+                        ${task.completed ? '<i data-lucide="check" size="16"></i>' : ''}
+                    </div>
+                    <div class="task-content">
+                        <span class="task-text">${task.text.replace(/#(\w+)/g, '<span class="tag">#$1</span>')}</span>
+                    </div>
+                    <div class="actions">
+                        <button class="action-btn" onclick="deleteTask('${task.id}')"><i data-lucide="trash-2" size="16"></i></button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+            updateStats();
+            lucide.createIcons();
+        }
+
+        function updateStats() {
+            const current = tasks.filter(t => t.assignedDate === selectedDate);
+            document.getElementById('stat-total').innerText = current.length;
+            document.getElementById('stat-pending').innerText = current.filter(t => !t.completed).length;
+            document.getElementById('stat-done').innerText = current.filter(t => t.completed).length;
+        }
+
+        async function addTask() {
+            const inp = document.getElementById('task-input');
+            if (!inp.value.trim()) return;
+            const res = await fetch(`${API_URL}/tasks`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: inp.value, assignedDate: selectedDate })
+            });
+            if (res.ok) { inp.value = ''; fetchTasks(); }
+        }
 
         window.deleteTask = async (id) => {
-            if (!confirm('Delete mission?')) return;
-
-            try {
-                const response = await fetch(`${API_URL}/tasks/${id}`, {
-                    method: "DELETE"
-                });
-
-                if (!response.ok) throw new Error(`API error: ${response.status}`);
+            if (confirm('Delete?')) {
+                await fetch(`${API_URL}/tasks/${id}`, { method: "DELETE" });
                 fetchTasks();
-                showToast("🗑️ Task deleted!");
-            } catch (err) {
-                console.error("Delete task error:", err);
-                showToast("❌ Failed to delete task");
             }
         };
 
-        // ─── Sortable ─────────────────────────────────────────────────────────
-        new Sortable(document.getElementById('task-list'), {
-            animation: 150,
-            handle: '.task-content',
-            filter: '.task-edit-input',
-            onEnd: function () {
-                const list = document.getElementById('task-list');
-                const newIds = Array.from(list.querySelectorAll('.task-card')).map(li => li.dataset.id);
-                const currentDayTasks = tasks.filter(t => t.assignedDate === selectedDate);
-                const otherDayTasks = tasks.filter(t => t.assignedDate !== selectedDate);
+        // --- Restored Copy Yesterday Logic ---
+        document.getElementById('copy-yesterday-to-today').onclick = async function () {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yestStr = yesterday.toLocaleDateString('en-CA');
+            const todayStr = new Date().toLocaleDateString('en-CA');
 
-                const reorderedDayTasks = newIds
-                    .map(id => currentDayTasks.find(t => t.id === id))
-                    .filter(Boolean);
-
-                tasks = [...reorderedDayTasks, ...otherDayTasks];
-                localStorage.setItem('ankith_focus_ai_v1', JSON.stringify(tasks));
-                lucide.createIcons();
-            }
-        });
-
-        // ─── UI Controls ──────────────────────────────────────────────────────
-        document.getElementById('prev-month').onclick = () => {
-            calendarNavDate.setMonth(calendarNavDate.getMonth() - 1);
-            renderCalendar();
-        };
-
-        document.getElementById('next-month').onclick = () => {
-            calendarNavDate.setMonth(calendarNavDate.getMonth() + 1);
-            renderCalendar();
-        };
-
-        document.getElementById('toggle-calendar-btn').onclick = () => {
-            const widget = document.getElementById('calendar-widget');
-            const isOpen = widget.style.display === 'block';
-            widget.style.display = isOpen ? 'none' : 'block';
-            if (!isOpen) renderCalendar();
-        };
-
-        // ✅ FIXED: Single, correct event listener
-        document.getElementById('add-btn').onclick = addTask;
-
-        document.getElementById('task-input').addEventListener('keydown', e => {
-            if (e.key === 'Enter') addTask();
-        });
-
-        // ─── Copy Previous Day Tasks to Today ────────────────────────────────
-        document.getElementById('copy-prev-to-today').onclick = async function () {
-            if (selectedDate === localDateStr()) {
-                showToast("You are already on today! Select a previous day.");
-                return;
-            }
-            // Fetch tasks for selectedDate (if not already loaded)
-            let prevTasks = [];
             try {
-                const res = await fetch(`${API_URL}/tasks?date=${selectedDate}`);
-                if (!res.ok) throw new Error();
-                prevTasks = await res.json();
-            } catch {
-                showToast("Failed to fetch previous day tasks");
-                return;
-            }
-            if (!Array.isArray(prevTasks) || prevTasks.length === 0) {
-                showToast("No tasks to copy from selected day.");
-                return;
-            }
-            let copied = 0;
-            for (const t of prevTasks) {
-                // Only copy incomplete tasks
-                if (!t.completed) {
-                    try {
-                        const resp = await fetch(`${API_URL}/tasks`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                text: t.text,
-                                assignedDate: localDateStr(),
-                                pinned: t.pinned || false,
-                                category: t.category || "General",
-                                priority: t.priority || "Medium"
-                            })
-                        });
-                        if (resp.ok) copied++;
-                    } catch { }
+                const res = await fetch(`${API_URL}/tasks?date=${yestStr}`);
+                const prevTasks = await res.json();
+
+                const pending = prevTasks.filter(t => !t.completed);
+                if (pending.length === 0) {
+                    showToast("No pending tasks to copy!");
+                    return;
                 }
-            }
-            if (copied > 0) {
-                showToast(`Copied ${copied} tasks to today!`);
-                // Switch to today and refresh
-                selectedDate = localDateStr();
+
+                for (const t of pending) {
+                    await fetch(`${API_URL}/tasks`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ text: t.text, assignedDate: todayStr, pinned: t.pinned })
+                    });
+                }
+
+                selectedDate = todayStr;
+                timelineOffset = 0;
                 setupTimeline();
-                renderCalendar();
-                fetchTasks(true);
-            } else {
-                showToast("No incomplete tasks to copy.");
+                fetchTasks();
+                showToast(`Copied ${pending.length} tasks!`);
+            } catch (err) {
+                showToast("Failed to copy tasks.");
             }
         };
 
-        // ─── Init ─────────────────────────────────────────────────────────────
+        function applySuggest(tag) {
+            const inp = document.getElementById('task-input');
+            inp.value = tag + " ";
+            inp.focus();
+        }
+
+        document.getElementById('filter-all').onclick = () => { filterMode = 'all'; renderTasks(); };
+        document.getElementById('filter-pending').onclick = () => { filterMode = 'pending'; renderTasks(); };
+        document.getElementById('filter-completed').onclick = () => { filterMode = 'completed'; renderTasks(); };
+        document.getElementById('add-btn').onclick = addTask;
+        document.getElementById('task-input').onkeydown = e => e.key === 'Enter' && addTask();
+
         startClock();
         setupTimeline();
-        renderCalendar();
-        fetchTasks(true);
+        fetchTasks();
     </script>
 </body>
 
