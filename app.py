@@ -86,9 +86,17 @@ def add_task():
         if not data.get('text'):
             return jsonify({"error": "Task text is required"}), 400
 
+        # Ensure assignedDate is always set and in YYYY-MM-DD format
+        assigned_date = data.get('assignedDate')
+        if not assigned_date:
+            assigned_date = datetime.now().strftime('%Y-%m-%d')
+        else:
+            # If assigned_date is a datetime, convert to string
+            if isinstance(assigned_date, datetime):
+                assigned_date = assigned_date.strftime('%Y-%m-%d')
         task = {
             "text": data['text'],
-            "assignedDate": data.get('assignedDate'),
+            "assignedDate": assigned_date,
             "completed": False,
             "pinned": False,
             "createdAt": datetime.now(timezone.utc)

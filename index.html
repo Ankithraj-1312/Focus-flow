@@ -660,7 +660,14 @@
         }
 
         // ─── Fetch Tasks ──────────────────────────────────────────────────────
-        async function fetchTasks() {
+        let lastFetchedDate = null;
+        async function fetchTasks(force = false) {
+            // Only fetch if date changed or forced
+            if (!force && selectedDate === lastFetchedDate) {
+                renderTasks();
+                return;
+            }
+            lastFetchedDate = selectedDate;
             try {
                 const res = await fetch(`${API_URL}/tasks?date=${selectedDate}`);
                 if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -783,8 +790,8 @@
                     selectedDate = dStr;
                     editingId = null;
                     setupTimeline();
-                    renderTasks();
                     renderCalendar();
+                    fetchTasks(true); // Always fetch tasks when date changes
                 };
                 bar.appendChild(tab);
             }
@@ -821,8 +828,8 @@
                     selectedDate = dateStr;
                     editingId = null;
                     setupTimeline();
-                    renderTasks();
                     renderCalendar();
+                    fetchTasks(true); // Always fetch tasks when date changes
                 };
                 daysGrid.appendChild(d);
             }
@@ -1039,7 +1046,7 @@
         startClock();
         setupTimeline();
         renderCalendar();
-        fetchTasks();
+        fetchTasks(true);
     </script>
 </body>
 
