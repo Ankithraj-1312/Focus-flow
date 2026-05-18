@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
     <style>
         :root {
             --bg: #0f172a;
@@ -599,10 +600,53 @@
             border-radius: 10px;
             margin-bottom: 15px;
         }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            z-index: 20000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(129, 140, 248, 0.1);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loader-text {
+            font-weight: 600;
+            color: var(--primary);
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+        }
+
+        .sortable-ghost {
+            opacity: 0.4;
+            background: var(--primary);
+        }
     </style>
 </head>
 
 <body>
+    <div id="loading-overlay">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">WAKING UP AI...</div>
+    </div>
+
     <div class="app-container">
         <nav>
             <div class="nav-logo">FocusFlow AI</div>
@@ -725,13 +769,37 @@
 
     <script>
         let tasks = [];
-        const API_URL = "https://focus-flow-gdii.onrender.com";
-        let selectedDate = new Date().toLocaleDateString('en-CA');
+        const API_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+            ? "http://127.0.0.1:5000"
+            : "https://focus-flow-gdii.onrender.com";
+
+        function formatDate(date) {
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        let selectedDate = formatDate(new Date());
         let calDate = new Date();
         let timelineOffset = 0;
         let filterMode = 'all';
+        let isFirstLoad = true;
 
         // ==================== UTILITY FUNCTIONS ====================
+        async function warmUpBackend() {
+            try {
+                fetch(`${API_URL}/`).catch(() => {});
+            } catch (e) {}
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.visibility = 'hidden', 500);
+            }
+        }
         function startClock() {
             const tick = () => {
                 const now = new Date();
@@ -768,8 +836,8 @@
             }
 
             return {
-                start: startDate.toLocaleDateString('en-CA'),
-                end: endDate.toLocaleDateString('en-CA'),
+                start: formatDate(startDate),
+                end: formatDate(endDate),
                 startDate,
                 endDate
             };
@@ -943,11 +1011,11 @@ Use these insights to improve your productivity and task management.
         function setupTimeline() {
             const bar = document.getElementById('timeline-bar');
             bar.innerHTML = '';
-            const todayStr = new Date().toLocaleDateString('en-CA');
+            const todayStr = formatDate(new Date());
             for (let i = -1 + timelineOffset; i <= 3 + timelineOffset; i++) {
                 const d = new Date();
                 d.setDate(d.getDate() + i);
-                const dStr = d.toLocaleDateString('en-CA');
+                const dStr = formatDate(d);
                 const tab = document.createElement('div');
                 tab.className = `day-tab ${dStr === selectedDate ? 'active' : ''}`;
                 tab.innerHTML = `<span>${dStr === todayStr ? 'Today' : d.toLocaleDateString(undefined, { weekday: 'short' })}</span><strong>${d.getDate()}</strong>`;
@@ -961,14 +1029,47 @@ Use these insights to improve your productivity and task management.
         }
 
         async function fetchTasks() {
+            if (isFirstLoad) {
+                setTimeout(() => {
+                    if (isFirstLoad) {
+                        hideLoading();
+                        isFirstLoad = false;
+                        showToast("Backend waking up in background...");
+                    }
+                }, 5000);
+            }
             try {
+                // Show cached tasks immediately
+                if (isFirstLoad) {
+                    const cached = localStorage.getItem(`tasks_${selectedDate}`);
+                    if (cached) {
+                        tasks = JSON.parse(cached);
+                        renderTasks();
+                    }
+                }
+
                 const res = await fetch(`${API_URL}/tasks?date=${selectedDate}`);
                 if (!res.ok) throw new Error('Failed to fetch tasks');
                 tasks = await res.json();
+                
+                // Cache the results
+                localStorage.setItem(`tasks_${selectedDate}`, JSON.stringify(tasks));
+                
                 renderTasks();
+                
+                if (isFirstLoad) {
+                    isFirstLoad = false;
+                    hideLoading();
+                }
             } catch (err) {
                 console.error('Error fetching tasks:', err);
-                showToast('Error loading tasks');
+                if (isFirstLoad) {
+                    // Even if error, hide loading but show cached data if any
+                    hideLoading();
+                    isFirstLoad = false;
+                }
+                showToast('AI is still waking up... trying again');
+                setTimeout(fetchTasks, 3000); // Retry after 3 seconds
             }
         }
 
@@ -1016,6 +1117,18 @@ Use these insights to improve your productivity and task management.
             });
             updateStats();
             lucide.createIcons();
+
+            if (window.taskSortable) {
+                window.taskSortable.destroy();
+            }
+            window.taskSortable = new Sortable(list, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function(evt) {
+                    const movedItem = filtered.splice(evt.oldIndex, 1)[0];
+                    filtered.splice(evt.newIndex, 0, movedItem);
+                }
+            });
         }
 
         function updateStats() {
@@ -1096,7 +1209,7 @@ Use these insights to improve your productivity and task management.
             // Days of month
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateObj = new Date(year, month, d);
-                const dStr = dateObj.toLocaleDateString('en-CA');
+                const dStr = formatDate(dateObj);
                 const cell = document.createElement('div');
                 cell.className = `cal-day-cell ${dStr === selectedDate ? 'selected' : ''}`;
                 cell.innerText = d;
@@ -1127,8 +1240,8 @@ Use these insights to improve your productivity and task management.
         document.getElementById('copy-yesterday-to-today').onclick = async function () {
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
-            const yestStr = yesterday.toLocaleDateString('en-CA');
-            const todayStr = new Date().toLocaleDateString('en-CA');
+            const yestStr = formatDate(yesterday);
+            const todayStr = formatDate(new Date());
             try {
                 const res = await fetch(`${API_URL}/tasks?date=${yestStr}`);
                 const prev = await res.json();
@@ -1176,6 +1289,8 @@ Use these insights to improve your productivity and task management.
         }
 
         // ==================== INITIALIZATION ====================
+        lucide.createIcons();
+        warmUpBackend();
         startClock();
         setupTimeline();
         fetchTasks();

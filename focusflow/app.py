@@ -25,6 +25,11 @@ try:
     mongo.cx.server_info()
     print("✅ MongoDB Connected Successfully")
     print("DB:", db)
+    
+    # Create indexes for performance
+    db.tasks.create_index([("assignedDate", 1)])
+    db.tasks.create_index([("pinned", -1), ("completed", 1), ("createdAt", -1)])
+    print("🚀 Database Indexes Initialized")
 except Exception as e:
     print("❌ MongoDB Connection Failed:", e)
 
