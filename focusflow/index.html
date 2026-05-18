@@ -769,9 +769,10 @@
 
     <script>
         let tasks = [];
-        const API_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        let API_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
             ? "http://127.0.0.1:5000"
             : "https://focus-flow-gdii.onrender.com";
+        let retryCount = 0;
 
         function formatDate(date) {
             const yyyy = date.getFullYear();
@@ -789,7 +790,12 @@
         // ==================== UTILITY FUNCTIONS ====================
         async function warmUpBackend() {
             try {
-                fetch(`${API_URL}/`).catch(() => {});
+                const res = await fetch(`${API_URL}/`).catch(() => null);
+                if (!res && API_URL === "http://127.0.0.1:5000") {
+                    console.log("Local backend offline, switching to cloud backend...");
+                    API_URL = "https://focus-flow-gdii.onrender.com";
+                    warmUpBackend();
+                }
             } catch (e) {}
         }
 
@@ -1034,7 +1040,7 @@ Use these insights to improve your productivity and task management.
                     if (isFirstLoad) {
                         hideLoading();
                         isFirstLoad = false;
-                        showToast("Backend waking up in background...");
+                        showToast("Waking up AI backend...");
                     }
                 }, 5000);
             }
@@ -1056,20 +1062,31 @@ Use these insights to improve your productivity and task management.
                 localStorage.setItem(`tasks_${selectedDate}`, JSON.stringify(tasks));
                 
                 renderTasks();
+                retryCount = 0; // reset on success
                 
                 if (isFirstLoad) {
                     isFirstLoad = false;
                     hideLoading();
                 }
             } catch (err) {
-                console.error('Error fetching tasks:', err);
+                console.error('Error fetching tasks from', API_URL, ':', err);
+                if (API_URL === "http://127.0.0.1:5000") {
+                    console.log("Local server unreachable, falling back to live cloud backend...");
+                    API_URL = "https://focus-flow-gdii.onrender.com";
+                    setTimeout(fetchTasks, 500);
+                    return;
+                }
                 if (isFirstLoad) {
-                    // Even if error, hide loading but show cached data if any
                     hideLoading();
                     isFirstLoad = false;
                 }
-                showToast('AI is still waking up... trying again');
-                setTimeout(fetchTasks, 3000); // Retry after 3 seconds
+                if (retryCount < 3) {
+                    retryCount++;
+                    showToast(`Connecting to AI backend... (${retryCount}/3)`);
+                    setTimeout(fetchTasks, 3000);
+                } else {
+                    showToast('Offline Mode: Using cached tasks.');
+                }
             }
         }
 
