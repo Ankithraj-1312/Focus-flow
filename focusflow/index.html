@@ -769,7 +769,7 @@
 
     <script>
         let tasks = [];
-        let API_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        let API_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:")
             ? "http://127.0.0.1:5000"
             : "https://focus-flow-gdii.onrender.com";
         let retryCount = 0;
@@ -1035,6 +1035,17 @@ Use these insights to improve your productivity and task management.
         }
 
         async function fetchTasks() {
+            // Load and render cached tasks immediately for this selectedDate to ensure responsive UI
+            const cached = localStorage.getItem(`tasks_${selectedDate}`);
+            if (cached) {
+                tasks = JSON.parse(cached);
+                renderTasks();
+            } else {
+                // Clear tasks so we don't display the previous date's tasks while loading
+                tasks = [];
+                renderTasks();
+            }
+
             if (isFirstLoad) {
                 setTimeout(() => {
                     if (isFirstLoad) {
@@ -1045,15 +1056,6 @@ Use these insights to improve your productivity and task management.
                 }, 5000);
             }
             try {
-                // Show cached tasks immediately
-                if (isFirstLoad) {
-                    const cached = localStorage.getItem(`tasks_${selectedDate}`);
-                    if (cached) {
-                        tasks = JSON.parse(cached);
-                        renderTasks();
-                    }
-                }
-
                 const res = await fetch(`${API_URL}/tasks?date=${selectedDate}`);
                 if (!res.ok) throw new Error('Failed to fetch tasks');
                 tasks = await res.json();
@@ -1086,6 +1088,13 @@ Use these insights to improve your productivity and task management.
                     setTimeout(fetchTasks, 3000);
                 } else {
                     showToast('Offline Mode: Using cached tasks.');
+                    const offlineCached = localStorage.getItem(`tasks_${selectedDate}`);
+                    if (offlineCached) {
+                        tasks = JSON.parse(offlineCached);
+                    } else {
+                        tasks = [];
+                    }
+                    renderTasks();
                 }
             }
         }
@@ -1108,6 +1117,52 @@ Use these insights to improve your productivity and task management.
             }
         };
 
+        let editingTaskId = null;
+
+        window.startEdit = (id) => {
+            editingTaskId = id;
+            renderTasks();
+        };
+
+        window.cancelEdit = () => {
+            editingTaskId = null;
+            renderTasks();
+        };
+
+        window.saveEdit = async (id) => {
+            const input = document.getElementById(`edit-input-${id}`);
+            if (!input) return;
+            const newText = input.value.trim();
+            if (!newText) {
+                showToast("Task cannot be empty!");
+                return;
+            }
+
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+
+            const oldText = task.text;
+            task.text = newText;
+            editingTaskId = null;
+            renderTasks();
+
+            try {
+                const res = await fetch(`${API_URL}/tasks/${id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: newText })
+                });
+                if (!res.ok) throw new Error("Failed to save edit");
+                showToast("Task updated! 📝");
+                localStorage.setItem(`tasks_${selectedDate}`, JSON.stringify(tasks));
+            } catch (err) {
+                console.error(err);
+                task.text = oldText; // revert on error
+                renderTasks();
+                showToast("Failed to save edit");
+            }
+        };
+
         function renderTasks() {
             const list = document.getElementById('task-list');
             let filtered = tasks.filter(t => t.assignedDate === selectedDate)
@@ -1121,16 +1176,57 @@ Use these insights to improve your productivity and task management.
             filtered.forEach(task => {
                 const li = document.createElement('li');
                 li.className = `task-card ${task.completed ? 'completed' : ''}`;
+                
+                const isEditing = editingTaskId === task.id;
+                let contentHTML = '';
+                let actionsHTML = '';
+                
+                if (isEditing) {
+                    contentHTML = `
+                        <div class="task-content">
+                            <input type="text" id="edit-input-${task.id}" class="edit-task-input" value="${task.text.replace(/"/g, '&quot;')}" style="width: 100%; background: rgba(255,255,255,0.08); border: 1px solid var(--primary); color: white; padding: 6px 12px; border-radius: 8px; font-size: 1.05rem; outline: none; font-family: inherit;">
+                        </div>
+                    `;
+                    actionsHTML = `
+                        <button class="action-btn" onclick="saveEdit('${task.id}')" style="color: var(--success);"><i data-lucide="check" size="16"></i></button>
+                        <button class="action-btn" onclick="cancelEdit()" style="color: var(--danger);"><i data-lucide="x" size="16"></i></button>
+                    `;
+                } else {
+                    contentHTML = `
+                        <div class="task-content"><span class="task-text">${task.text}</span></div>
+                    `;
+                    actionsHTML = `
+                        <button class="action-btn" onclick="startEdit('${task.id}')"><i data-lucide="edit-3" size="16"></i></button>
+                        <button class="action-btn" onclick="deleteTask('${task.id}')"><i data-lucide="trash-2" size="16"></i></button>
+                    `;
+                }
+                
                 li.innerHTML = `
-                    <div class="check-circle ${task.completed ? 'checked' : ''}" onclick="toggleTask('${task.id}')">
+                    <div class="check-circle ${task.completed ? 'checked' : ''}" ${isEditing ? '' : `onclick="toggleTask('${task.id}')"`}>
                         ${task.completed ? '<i data-lucide="check" size="16"></i>' : ''}
                     </div>
-                    <div class="task-content"><span class="task-text">${task.text}</span></div>
+                    ${contentHTML}
                     <div class="actions">
-                        <button class="action-btn" onclick="deleteTask('${task.id}')"><i data-lucide="trash-2" size="16"></i></button>
+                        ${actionsHTML}
                     </div>
                 `;
                 list.appendChild(li);
+                
+                if (isEditing) {
+                    const input = document.getElementById(`edit-input-${task.id}`);
+                    if (input) {
+                        input.focus();
+                        input.select();
+                        input.onkeydown = (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                saveEdit(task.id);
+                            } else if (e.key === 'Escape') {
+                                cancelEdit();
+                            }
+                        };
+                    }
+                }
             });
             updateStats();
             lucide.createIcons();
@@ -1141,6 +1237,8 @@ Use these insights to improve your productivity and task management.
             window.taskSortable = new Sortable(list, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
+                filter: '.edit-task-input',
+                preventOnFilter: false,
                 onEnd: function(evt) {
                     const movedItem = filtered.splice(evt.oldIndex, 1)[0];
                     filtered.splice(evt.newIndex, 0, movedItem);
@@ -1255,21 +1353,21 @@ Use these insights to improve your productivity and task management.
 
         // ==================== COPY YESTERDAY & FILTERS ====================
         document.getElementById('copy-yesterday-to-today').onclick = async function () {
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yestStr = formatDate(yesterday);
-            const todayStr = formatDate(new Date());
+            const currentSelDate = new Date(selectedDate);
+            const prevDay = new Date(currentSelDate);
+            prevDay.setDate(prevDay.getDate() - 1);
+            const prevDayStr = formatDate(prevDay);
             try {
-                const res = await fetch(`${API_URL}/tasks?date=${yestStr}`);
+                const res = await fetch(`${API_URL}/tasks?date=${prevDayStr}`);
+                if (!res.ok) throw new Error("Failed to fetch tasks");
                 const prev = await res.json();
                 const pending = prev.filter(t => !t.completed);
-                if (!pending.length) { showToast("Nothing to copy!"); return; }
+                if (!pending.length) { showToast(`No pending tasks on ${prevDayStr}!`); return; }
                 await Promise.all(pending.map(t => fetch(`${API_URL}/tasks`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text: t.text, assignedDate: todayStr })
+                    body: JSON.stringify({ text: t.text, assignedDate: selectedDate })
                 })));
-                selectedDate = todayStr;
                 fetchTasks();
                 showToast("Copied! 📋");
             } catch (err) {

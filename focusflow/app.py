@@ -23,15 +23,15 @@ db = mongo.cx["focusflow_db"]
 # 🔍 Test connection
 try:
     mongo.cx.server_info()
-    print("✅ MongoDB Connected Successfully")
+    print("[OK] MongoDB Connected Successfully")
     print("DB:", db)
     
     # Create indexes for performance
     db.tasks.create_index([("assignedDate", 1)])
     db.tasks.create_index([("pinned", -1), ("completed", 1), ("createdAt", -1)])
-    print("🚀 Database Indexes Initialized")
+    print("Database Indexes Initialized")
 except Exception as e:
-    print("❌ MongoDB Connection Failed:", e)
+    print("[ERROR] MongoDB Connection Failed:", e)
 
 
 # 🔹 Helper
@@ -83,7 +83,7 @@ def get_tasks():
 def add_task():
     try:
         data = request.get_json()
-        print("📥 Received data:", data)
+        print("[INPUT] Received data:", data)
 
         if not data:
             return jsonify({"error": "Invalid JSON"}), 400
@@ -110,11 +110,11 @@ def add_task():
             "createdAt": datetime.now(timezone.utc)
         }
 
-        print("📦 Task to insert:", task)
+        print("[TASK] Task to insert:", task)
 
         result = db.tasks.insert_one(task)
 
-        print("✅ Inserted ID:", result.inserted_id)
+        print("[ADDED] Inserted ID:", result.inserted_id)
 
         return jsonify({
             "message": "Task created",
